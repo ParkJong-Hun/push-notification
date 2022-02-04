@@ -8,18 +8,30 @@ import android.content.Intent
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Button
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
 class MainActivity : AppCompatActivity() {
     //고유 채널 아이디
     val CHANNEL_ID = "test"
-    //고유 알림 아이디
-    val notificationId = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
+        val button: Button = findViewById(R.id.button)
+        button.setOnClickListener {
+            displayNotification()
+        }
+    }
+
+    //알림 만들어서 표시
+    fun displayNotification() {
+        createNotificationChannel()
+        //고유 알림 아이디
+        val notificationId = 1
 
         val textTitle = "test title"
         val textContent = "this is content."
@@ -28,11 +40,11 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, AlertDetails::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }//AlertDetails 액티비티에 플래그 전달
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, intent, 0)//intent를 이용해 Notification에 필요한PendingIntent 생성
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)//intent를 이용해 Notification에 필요한PendingIntent 생성
 
         //기본 알림 만들기
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(androidx.core.R.drawable.notification_icon_background)//아이콘
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_background)//아이콘
             .setContentTitle(textTitle)//제목
             .setContentText(textContent)//내용
             .setStyle(NotificationCompat.BigTextStyle()//확장 가능 알림 설정
@@ -40,9 +52,11 @@ class MainActivity : AppCompatActivity() {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)//중요도
             .setContentIntent(pendingIntent)//유저가 탭할 때의 인텐트
             .setAutoCancel(true)//자동 알림 삭제
+            .build()
 
+        //알림 표시
         with(NotificationManagerCompat.from(this)) {
-            notify(notificationId, builder.build())
+            notify(notificationId, notification)
         }
     }
 
